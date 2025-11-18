@@ -32,3 +32,5 @@ def validate_event_payload(payload: Dict[str, Any]) -> bool:
     """Validate that event payload contains required fields."""
     required_fields = ["event_type", "user_id"]
     return all(field in payload for field in required_fields)
+
+# TODO: Add more validation rules later - amount ranges, etc.

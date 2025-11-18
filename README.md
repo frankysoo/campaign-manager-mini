@@ -88,20 +88,20 @@ campaign-manager-mini/
 ├── Makefile, README.md, requirements*.txt
 ```
 
-## Limitations
+## Current Limitations
 
-- Simple matching rules (only event_type).
-- Single worker process.
-- No auth.
-- Basic idempotency.
+- Only supports event_type matching (yeah, pretty basic)
+- Single worker - not great for high load
+- No authentication (don't deploy to internet!)
+- Idempotency is basic - could have edge cases
 
-## Future Improvements
+## Next Steps / Ideas
 
-- Advanced rule matching (e.g., conditions).
-- Multiple workers with clustering.
-- Authentication.
-- Metrics and monitoring.
-- Event sourcing.
+- Add more rule types like user segments, purchase amounts
+- Multiple workers with leader election
+- Add JWT auth with role-based access
+- Monitoring dashboard with Grafana/Prometheus
+- Event sourcing for audit trails
 
 ## Quality Gates and CI/CD
 

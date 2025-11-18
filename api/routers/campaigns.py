@@ -10,8 +10,34 @@ router = APIRouter()
 
 @router.get("/")
 async def list_campaigns():
-    # Stub, return empty list for now
-    return []
+    async with get_session() as session:
+        result = await session.execute(select(Campaign))
+        campaigns = result.scalars().all()
+        return [
+            CampaignOut(
+                id=db_campaign.id,
+                name=db_campaign.name,
+                rules=db_campaign.rules,
+                created_at=db_campaign.created_at.isoformat()
+            )
+            for db_campaign in campaigns
+        ]
+
+@router.get("/{campaign_id}")
+async def get_campaign(campaign_id: int):
+    async with get_session() as session:
+        result = await session.execute(select(Campaign).where(Campaign.id == campaign_id))
+        db_campaign = result.scalars().first()
+
+        if not db_campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+
+        return CampaignOut(
+            id=db_campaign.id,
+            name=db_campaign.name,
+            rules=db_campaign.rules,
+            created_at=db_campaign.created_at.isoformat()
+        )
 
 @router.post("/", response_model=CampaignOut)
 async def create_campaign(campaign: CampaignCreate) -> CampaignOut:

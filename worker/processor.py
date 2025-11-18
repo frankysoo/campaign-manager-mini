@@ -58,8 +58,8 @@ async def process_event_core(event: dict):
 
 async def send_to_dlq(event: dict, error: Exception):
     """Send failed event to dead letter queue for later investigation."""
-    # In production, this would publish to Redis DLQ or another queue system
-    logger.error(f"Sending event {event['event_id']} to DLQ: {error}")
+    # TODO: Actually send to Redis DLQ channel - for now just log
+    logger.error(f"Event {event['event_id']} failed: {error}")
 
 async def process_event(event: dict):
     """Process event with retry logic and DLQ."""
