@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campaign-manager-worker
+  labels:
+    app.kubernetes.io/name: campaign-manager-worker
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: campaign-manager-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: campaign-manager-worker
+        app.kubernetes.io/component: worker
+      annotations:
+        checksum/config: ""  # Add checksum annotation for configmap updates
+    spec:
+      containers:
+      - name: worker
+        image: campaign-manager-worker:latest
+        imagePullPolicy: Always
+        env:
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: campaign-manager-config
+              key: postgres_host
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: campaign-manager-config
+              key: postgres_port
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: campaign-manager-config
+              key: postgres_db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: campaign-manager-config
+              key: postgres_user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: campaign-manager-secret
+              key: postgres_password
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: campaign-manager-config
+              key: redis_url
+        - name: WORKER_CONCURRENCY
+          valueFrom:
+            configMapKeyRef:
+              name: campaign-manager-config
+              key: worker_concurrency
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: campaign-manager-config
+              key: log_level
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import redis; redis.Redis.from_url(os.environ.get('REDIS_URL', 'redis://localhost:6379')).ping()"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import redis; redis.Redis.from_url(os.environ.get('REDIS_URL', 'redis://localhost:6379')).ping()"
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi

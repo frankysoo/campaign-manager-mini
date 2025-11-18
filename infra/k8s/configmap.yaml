@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: campaign-manager-config
+  labels:
+    app.kubernetes.io/name: campaign-manager-config
+data:
+  postgres_host: "postgres"
+  postgres_port: "5432"
+  postgres_db: "postgres"
+  postgres_user: "postgres"
+  redis_url: "redis://redis:6379"
+  api_port: "8000"
+  worker_concurrency: "4"
+  log_level: "INFO"
