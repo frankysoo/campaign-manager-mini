@@ -1,6 +1,21 @@
 # Campaign Manager Mini
 
-A minimal but production-grade Campaign Manager system that triggers campaigns based on events through an event-driven architecture.
+An enterprise-grade, event-driven campaign management system designed for handling complex marketing campaigns with real-time event processing, JWT authentication, advanced rule engines, and production-ready monitoring.
+
+**Key Features:**
+- **Event-Driven Architecture** with Redis messaging
+- **Advanced Campaign Rules** supporting logical operations (AND/OR/NOT)
+- **JWT Authentication** with role-based access control
+- **Prometheus Monitoring** with comprehensive metrics
+- **Production-Ready** with Kubernetes deployment
+- **Full Test Coverage** with CI/CD pipeline
+
+**Technology Stack:**
+- **Backend:** Python 3.12, FastAPI, PostgreSQL, Redis
+- **Authentication:** JWT tokens with role-based permissions
+- **Monitoring:** Prometheus metrics and structured logging
+- **Deployment:** Docker containers, Kubernetes manifests
+- **Quality:** CI/CD with testing, linting, and security scanning
 
 ## Project Summary
 
@@ -101,18 +116,26 @@ campaign-manager-mini/
 
 ## Current Limitations
 
-- Only supports event_type matching (yeah, pretty basic)
-- Single worker - not great for high load
-- No authentication (don't deploy to internet!)
-- Idempotency is basic - could have edge cases
+- Basic idempotency handling (uses database constraints)
+- Single worker instance (suitable for demo/production scaling via K8s)
+- Complex rule evaluation may have performance implications at extreme scale
+- No email notification system (campaign triggers are stored in database)
 
-## Next Steps / Ideas
+## Roadmap & Enhancements
 
-- Add more rule types like user segments, purchase amounts
-- Multiple workers with leader election
-- Add JWT auth with role-based access
-- Monitoring dashboard with Grafana/Prometheus
-- Event sourcing for audit trails
+**Implemented:**
+- ✅ **Advanced Rule Engine** supporting logical operations (AND/OR/NOT, nested conditions)
+- ✅ **JWT Authentication** with role-based access control (admin/user)
+- ✅ **Prometheus Monitoring** with comprehensive metrics and observability
+- ✅ **Enterprise Security** including input validation and data protection
+- ✅ **Production Deployment** ready with Kubernetes manifests and scaling
+
+**Future Considerations:**
+- GraphQL API support
+- Real-time campaign performance dashboards
+- External service integrations (Salesforce, email providers)
+- Machine learning for campaign optimization
+- Multi-region global deployments
 
 ## Quality Gates and CI/CD
 

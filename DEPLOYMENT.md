@@ -1,58 +1,51 @@
-# Deployment Guide
+# Getting Campaign Manager Mini Running
 
-This guide covers deploying the Campaign Manager Mini system to both development and production environments.
+So you've got this Campaign Manager system and want to deploy it somewhere. Let me show you how to run it locally for development and get it into production. I've set this up to be pretty straightforward.
 
-## Prerequisites
+## What You Need First
 
-### Infrastructure Requirements
-- **Docker**: Docker Engine 20.10+ for containerized development
-- **Kubernetes**: 1.24+ for production deployments (optional)
-- **Helm**: 3.9+ for advanced K8s deployments (optional)
+### Basic Requirements
+You'll need Docker installed if you want the easy route. For production, you'll want Kubernetes, but that's optional for learning/testing.
 
-### Resource Requirements
-- **CPU**: 2 cores minimum (4 recommended)
-- **Memory**: 4GB RAM minimum (8GB recommended)
-- **Storage**: 10GB available disk space
-- **Network**: Access to DockerHub and Python Package Index
+You'll want at least 2 CPU cores and 4GB RAM for decent performance. 4 cores and 8GB is better if you're doing real testing.
 
-## Environment Configuration
+## Environment Setup
 
-### Required Environment Variables
+### Config File
 
-Create a `.env` file from the example:
+Start by copying the example config:
 
 ```bash
 cp .env.example .env
 ```
 
+Then edit `.env` with your real values. Here's what you need:
+
 ```env
-# Database Configuration (REQUIRED)
+# Database stuff - REQUIRED
 POSTGRES_HOST=localhost          # or 'db' for Docker
 POSTGRES_PORT=5432
 POSTGRES_DB=postgres
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_secure_db_password
+POSTGRES_PASSWORD=your_actual_db_password
 
-# Message Queue
-REDIS_URL=redis://localhost:6379  # or 'redis://redispubsub:6379' for Docker
+# Redis queue (for events)
+REDIS_URL=redis://localhost:6379  # 'redis://redispubsub:6379' for Docker
 
-# API Configuration
+# Web server
 API_PORT=8000
 
-# Worker Configuration
+# Worker settings
 WORKER_CONCURRENCY=4
 
-# Security (REQUIRED for authentication)
-SECRET_KEY=your-256-bit-secret-key-here-change-in-production
+# Security key for JWT tokens - PICK A GOOD ONE
+SECRET_KEY=some-really-long-random-key-make-it-secure
 
-# Logging
+# How noisy you want the logs
 LOG_LEVEL=INFO
 ```
 
-### Security Notes
-- Never commit the `.env` file to version control
-- Use strong, randomly generated secrets for `SECRET_KEY`
-- Rotate database passwords regularly in production
+Those secrets (password, JWT key) should never go into git. Keep them protected.
 
 ## Local Development Deployment
 

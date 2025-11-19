@@ -1,107 +1,64 @@
-# Security Considerations
+# Keeping Campaign Manager Secure
 
-This document outlines the security measures implemented in the Campaign Manager Mini system.
+Hey there, here's how we've built security into the Campaign Manager system. We took this seriously from day one since it's handling customer data and needs to be trustworthy.
 
-## Authentication & Authorization
+## Authentication That Works
 
-### JWT-Based Authentication
-- **Token Format**: JWT with RSA256 signature algorithm
-- **Expiration**: 30-minute token lifetime with sliding window
-- **User Management**: Password hashing using bcrypt with salt rounds
-- **Role-Based Access Control**:
-  - `admin`: Full system access, can create/modify campaigns
-  - `user`: Read-only access to campaigns and events
+We went with JWT tokens because they're standard and work well with REST APIs. Here's how it's set up:
 
-### API Security
-- **Route Protection**: Role-based dependencies decorate sensitive endpoints
-- **Token Validation**: Automatic token verification on protected routes
-- **Error Handling**: Secure error messages (no token leakage)
+- **JWT with RSA256 signing** - basically the industry standard for this kind of thing
+- **30 minute tokens** - not too long to be dangerous, but enough for use
+- **bcrypt password hashing** - strong, proven algorithm for protecting user passwords
+- **Two roles**: admin (can create campaigns and manage everything) and user (read-only access)
 
-## Data Protection
+For the API, we made sure protected routes actually check tokens and give generic error messages that don't leak any info.
 
-### Input Validation
-- **Schema Validation**: Pydantic models validate all incoming data
-- **SQL Injection Prevention**: SQLAlchemy ORM with parameterized queries
-- **Event Payload Sanitization**: Structured JSON validation prevents malformed data
+## Protecting Data and Inputs
 
-### Database Security
-- **Connection Security**: PostgreSQL with proper connection pooling
-- **Schema Constraints**: SQLAlchemy models enforce data integrity
-- **Transaction Safety**: ACID compliance prevents data corruption states
+Data protection was a big focus since we're dealing with user actions and campaign rules.
 
-### Secrets Management
-- **Environment Variables**: Sensitive config loaded securely
-- **No Hardcoded Secrets**: All credentials externalized
-- **Validation**: Required secrets validated at startup
-- **Runtime Safety**: Secrets not logged or exposed in errors
+**Input checking**: We use Pydantic models to validate everything coming in - no malformed JSON sneaks through.
 
-## Infrastructure Security
+**SQL safety**: SQLAlchemy handles all database queries with proper parameterization, so no SQL injection attacks.
 
-### Container Security
-- **Base Images**: Minimal Python images from trusted sources
-- **Non-Root Execution**: Applications run as non-privileged users
-- **Dependency Management**: Lockfile prevents supply chain attacks
-- **Vulnerability Scanning**: Dependencies regularly audited
+**Clean data**: Event payloads get validated as structured JSON before processing.
 
-### Network Security
-- **Service Isolation**: Separate containers for API, worker, database
-- **Internal Networking**: Services communicate through defined channels
-- **Health Monitoring**: Automated health checks prevent silent failures
+For the database itself, we use PostgreSQL's connection pooling and ACID properties to make sure data stays consistent and protected.
 
-### Kubernetes Security
-- **Resource Limits**: Prevent resource exhaustion attacks
-- **Secrets Management**: Kubernetes secrets for sensitive data
-- **RBAC**: Role-based access for cluster operations
-- **Network Policies**: Traffic control between pods
+## Environment and Secrets
 
-## Monitoring & Incident Response
+We don't hardcode any sensitive stuff. Everything sensitive (database passwords, JWT secrets) gets loaded from environment variables. At startup, we check that required secrets are present or the app refuses to start.
 
-### Security Monitoring
-- **Audit Logging**: Structured logs with correlation IDs
-- **Access Tracking**: User actions logged for security review
-- **Health Monitoring**: Automated detection of security anomalies
-- **Metrics Collection**: Observable security events via Prometheus
+During runtime, secrets never appear in logs or get exposed in error messages.
 
-### Incident Response
-- **Error Categorization**: Secure vs. non-secure error classification
-- **Graceful Degradation**: System continues operating during attacks
-- **Background Processing**: Fails securely without blocking user operations
+## Container and Infrastructure Security
 
-## Compliance Considerations
+**Docker setup**: We use minimal Python images from trusted sources, run as non-root users, and lock down dependencies.
 
-### Data Privacy
-- **Minimal Data Collection**: Only necessary user event data stored
-- **Purpose Limitation**: Data used solely for campaign matching
-- **Retention Policies**: Configurable data cleanup processes
+**Kubernetes**: We set resource limits to prevent one deployed instance from crashing the whole cluster. Secrets go in Kubernetes secrets store, and we use RBAC for cluster access.
 
-### Operational Security
-- **Access Logging**: All API access recorded for audit trails
-- **Configuration Validation**: Security settings validated at startup
-- **Dependency Updates**: Regular security patch application
+## Staying Aware
 
-## Development Security
+**Logging and monitoring**: We log user actions with correlation IDs so we can trace what happened if there are issues. The Prometheus metrics include security-related counters too.
 
-### Code Security
-- **Type Checking**: MyPy prevents type-related vulnerabilities
-- **Linting**: flake8 enforces secure coding patterns
-- **Testing**: Comprehensive test coverage includes security scenarios
+If something goes wrong, the system fails gracefully without exposing sensitive information or crashing hard.
 
-### Dependency Security
-- **Vulnerability Scanning**: Dependencies checked for known CVEs
-- **Version Pinning**: requirements.txt prevents unexpected updates
-- **Minimal Dependencies**: Only necessary packages included
+## Standards and Regulations
 
-## Security Recommendations
+**Data privacy**: We only store what's absolutely necessary for campaign processing. Data gets cleaned up regularly.
 
-### Production Deployment
-- **Enable HTTPS**: Always use TLS in production environments
-- **Regular Updates**: Keep base images and dependencies current
-- **Security Audits**: Regular code reviews and security testing
-- **Backup Security**: Encrypt database backups and secure storage
+**Compliance approach**: All security settings get validated when the app starts up. Dependencies get regular security audits.
 
-### Key Management
-- **JWT Secrets**: Use strong, rotated secrets for token signing
-- **Database Credentials**: Rotate passwords regularly
-- **API Keys**: Implement key rotation for external integrations
+## Keeping Code Safe
 
-This security implementation demonstrates enterprise-grade practices suitable for customer-facing systems, with defense-in-depth approaches protecting data confidentiality, integrity, and availability.
+During development:
+- **Type checking** with MyPy catches type-related security bugs early
+- **Linting** ensures we follow secure coding patterns
+- **Testing** includes security scenarios
+- Dependencies are pinned and vulnerability-checked
+
+## Production Considerations
+
+Run this behind HTTPS (no exception). Keep containers updated with security patches. Regularly audit the setup. Encrypt database backups.
+
+This setup gives us defense in depth - if one layer gets compromised, the others still protect the system. It's not perfect for an absolute security-critical system, but it's more than adequate for a campaign management platform handling business data.
