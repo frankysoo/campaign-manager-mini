@@ -3,6 +3,7 @@ import pytest
 from worker.processor import match_campaigns
 
 def test_match_campaigns():
+    # Test legacy format (for backward compatibility)
     campaigns = [
         type('Campaign', (object,), {'id': 1, 'rules': {'event_type': 'purchase'}})(),
         type('Campaign', (object,), {'id': 2, 'rules': {'event_type': 'signup'}})(),

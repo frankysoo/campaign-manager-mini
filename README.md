@@ -21,7 +21,7 @@ Event Source --> FastAPI API --> Redis Pub/Sub --> Worker --> PostgreSQL
 
 1. Install dependencies: `pip install -r requirements.txt -r requirements-dev.txt`
 2. Run PostgreSQL and Redis locally or use docker-compose.
-3. Set `.env` from `.env.example`.
+3. Set `.env` from `.env.example` (note: POSTGRES_PASSWORD is now required).
 4. Run API: `uvicorn api.main:app --reload`
 5. Run Worker: `python worker/main.py`
 
@@ -45,10 +45,21 @@ make k8s-apply
 
 ## API Endpoints
 
-- `GET /health` - Health check
-- `POST /campaigns` - Create campaign
+**Authentication:**
+- `POST /auth/token` - Login for access token
+- `GET /auth/users/me` - Get current user info
+
+**Campaigns:**
+- `POST /campaigns` - Create campaign (admin only)
 - `GET /campaigns` - List campaigns
+- `GET /campaigns/{id}` - Get single campaign
+
+**Events:**
 - `POST /events` - Send event for processing
+
+**System:**
+- `GET /health` - Health check
+- `GET /metrics` - Prometheus metrics
 
 See API docs at `http://localhost:8000/docs`
 

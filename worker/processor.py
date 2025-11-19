@@ -1,4 +1,5 @@
 import json
+import time
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
@@ -9,6 +10,8 @@ from common.utils import retry_with_backoff
 from worker.db import get_session
 from worker.utils.idempotency import is_event_processed
 from worker.utils.logger import get_logger
+from common.rule_engine import match_campaigns_enhanced
+from common.metrics import events_processed_total, events_processing_time_seconds, idempotent_event_skips_total, dead_letters_total
 
 logger = get_logger(__name__)
 
@@ -26,12 +29,14 @@ def match_campaigns(payload: dict, campaigns):
 
 async def process_event_core(event: dict):
     """Core event processing logic with error handling."""
+    start_time = time.time()
     event_id = event['event_id']
     payload = event['payload']
 
     logger.info(f"Processing event {event_id}")
 
     if await is_event_processed(event_id):
+        idempotent_event_skips_total.inc()
         logger.info(f"Event {event_id} already processed, skipping")
         return
 
@@ -40,8 +45,8 @@ async def process_event_core(event: dict):
         result = await session.execute(select(Campaign))
         campaigns = result.scalars().all()
 
-        # Match campaigns
-        triggered_ids = match_campaigns(payload, campaigns)
+        # Match campaigns using enhanced rule engine
+        triggered_ids = match_campaigns_enhanced(payload, campaigns)
 
         # Save event
         db_event = Event(
@@ -54,10 +59,16 @@ async def process_event_core(event: dict):
         session.add(db_event)
         await session.commit()
 
+        # Track successful processing
+        processing_time = time.time() - start_time
+        events_processing_time_seconds.observe(processing_time)
+        events_processed_total.labels(status="success").inc()
+
         logger.info(f"Event {event_id} processed successfully. Triggered campaigns: {triggered_ids}")
 
 async def send_to_dlq(event: dict, error: Exception):
     """Send failed event to dead letter queue for later investigation."""
+    dead_letters_total.inc()
     # TODO: Actually send to Redis DLQ channel - for now just log
     logger.error(f"Event {event['event_id']} failed: {error}")
 

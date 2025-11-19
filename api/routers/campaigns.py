@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from api.db import get_session
 from api.models import Campaign
 from api.schemas.campaign import CampaignCreate, CampaignOut
+from common.auth import get_current_active_user, get_admin_user, User
+from common.metrics import campaigns_created_total
 
 router = APIRouter()
 
@@ -40,10 +42,11 @@ async def get_campaign(campaign_id: int):
         )
 
 @router.post("/", response_model=CampaignOut)
-async def create_campaign(campaign: CampaignCreate) -> CampaignOut:
+async def create_campaign(campaign: CampaignCreate, current_user: User = Depends(get_admin_user)) -> CampaignOut:
     async with get_session() as session:
         # Check if campaign with same name exists?
         # For now, just create
+        campaigns_created_total.inc()
         db_campaign = Campaign(name=campaign.name, rules=campaign.rules)
         session.add(db_campaign)
         await session.commit()

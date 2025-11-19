@@ -54,7 +54,8 @@
 ## Components
 
 - **API**: Built with FastAPI, provides CRUD for campaigns and event ingestion, includes health check.
-- **Worker**: Python script using asyncio to consume from Redis, process events, and interact with DB.
+- **Worker**: Python script using asyncio to consume from Redis, process events with enhanced rule engine, and interact with DB.
+- **Rule Engine**: Advanced campaign matching supporting complex logical conditions, comparisons, and nested field access.
 - **Database**: PostgreSQL for relational storage of campaigns and event logs.
 - **Queue**: Redis Pub/Sub for decoupling API and Worker.
 
@@ -63,4 +64,5 @@
 - **Async All the Way**: Uvicorn, asyncpg, Redis async client for high concurrency.
 - **ORM**: SQLAlchemy async for DB interactions.
 - **Validation**: Pydantic for request/response schemas.
-- **Testing**: pytest for unit and integration tests.
+- **Configuration**: Environment-based config with validation for required variables.
+- **Metrics**: Prometheus monitoring for observability and alerting.

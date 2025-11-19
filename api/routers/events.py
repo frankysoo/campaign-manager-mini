@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from api.utils.publisher import publish_event
 from api.schemas.event import EventCreate, EventOut
 from common.utils import validate_event_payload
+from common.metrics import events_received_total
 
 router = APIRouter()
 
@@ -11,6 +12,9 @@ async def receive_event(event: EventCreate) -> EventOut:
     # Validate payload before publishing
     if not validate_event_payload(event.payload):
         raise HTTPException(status_code=422, detail="Invalid event payload")
+
+    # Increment metrics
+    events_received_total.inc()
 
     # Publish to queue
     await publish_event(event.dict())

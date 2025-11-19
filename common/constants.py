@@ -1,5 +1,9 @@
 # Redis queue names
 EVENTS_QUEUE = "events"
+
+# Campaign rule operators
+RULE_OPERATORS = ["equals", "greater_than", "less_than", "contains", "in", "between"]
+LOGICAL_OPERATORS = ["and", "or", "not"]
 DEAD_LETTER_QUEUE = "dead_letter_queue"
 
 # Event types

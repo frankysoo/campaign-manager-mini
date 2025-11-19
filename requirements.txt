@@ -5,3 +5,6 @@ sqlalchemy
 asyncpg
 redis[hiredis]
 python-json-logger
+prometheus-client
+python-jose[cryptography]
+passlib[bcrypt]
